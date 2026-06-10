@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0C447C">
+<title>아침 시장 브리핑</title>
+<link rel="manifest" href="/manifest.json">
+<style>
+:root {
+  --blue: #0C447C;
+  --blue2: #185FA5;
+  --green: #0F6E56;
+  --green-bg: #E1F5EE;
+  --green-dark: #085041;
+  --red: #A32D2D;
+  --red-bg: #FCEBEB;
+  --red-dark: #791F1F;
+  --amber: #633806;
+  --amber-bg: #FAEEDA;
+  --gray: #f5f5f3;
+  --gray2: #e8e8e5;
+  --border: #e0dfd8;
+  --text: #1a1a18;
+  --text2: #6b6b67;
+  --text3: #9b9b97;
+  --card: #ffffff;
+  --bg: #f5f5f3;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --gray: #1e1e1c;
+    --gray2: #2a2a28;
+    --border: #333330;
+    --text: #f0f0ee;
+    --text2: #a0a09c;
+    --text3: #606060;
+    --card: #252523;
+    --bg: #141412;
+    --green-bg: #0a2e22;
+    --red-bg: #2e0a0a;
+    --amber-bg: #2e1e08;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, 'Helvetica Neue', sans-serif; }
+body { display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; }
+
+/* Header */
+.hdr { background: var(--blue); color: #fff; padding: 52px 16px 16px; }
+.hdr-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.hdr-title { font-size: 20px; font-weight: 600; }
+.hdr-sub { font-size: 12px; opacity: .75; margin-top: 3px; }
+.hdr-ts { font-size: 11px; opacity: .6; margin-top: 8px; }
+.refresh-btn { background: rgba(255,255,255,.18); border: none; border-radius: 20px; color: #fff; font-size: 12px; padding: 6px 12px; cursor: pointer; white-space: nowrap; }
+.refresh-btn:active { background: rgba(255,255,255,.3); }
+
+/* Tabs */
+.tabs { display: flex; background: var(--card); border-bottom: .5px solid var(--border); position: sticky; top: 0; z-index: 10; }
+.tab { flex: 1; padding: 12px 4px; font-size: 12px; font-weight: 500; text-align: center; color: var(--text2); border: none; background: transparent; cursor: pointer; border-bottom: 2px solid transparent; }
+.tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+/* Scroll area */
+.content { flex: 1; overflow-y: auto; padding: 12px; }
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* Section title */
+.sec { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; margin: 16px 0 8px; }
+.sec:first-child { margin-top: 0; }
+
+/* Card */
+.card { background: var(--card); border-radius: 12px; border: .5px solid var(--border); margin-bottom: 10px; overflow: hidden; }
+.card-p { padding: 12px 14px; }
+
+/* Price table */
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tbl th { color: var(--text3); font-weight: 500; font-size: 11px; padding: 8px 10px 6px; text-align: right; border-bottom: .5px solid var(--border); }
+.tbl th:first-child { text-align: left; }
+.tbl td { padding: 9px 10px; border-bottom: .5px solid var(--border); text-align: right; }
+.tbl td:first-child { text-align: left; font-weight: 500; }
+.tbl tr:last-child td { border-bottom: none; }
+.up { color: var(--green); }
+.dn { color: var(--red); }
+.nt { color: var(--text2); }
+.ticker { font-size: 12px; color: var(--text2); font-weight: 400; display: block; }
+
+/* Badges */
+.badge { display: inline-block; padding: 2px 7px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.b-up { background: var(--green-bg); color: var(--green-dark); }
+.b-dn { background: var(--red-bg); color: var(--red-dark); }
+.b-nt { background: var(--gray2); color: var(--text2); }
+
+/* Events */
+.ev { border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; font-size: 13px; line-height: 1.6; }
+.ev strong { display: block; font-size: 13px; margin-bottom: 3px; }
+.ev-pos { background: var(--green-bg); color: var(--green-dark); border-left: 3px solid var(--green); }
+.ev-neg { background: var(--red-bg); color: var(--red-dark); border-left: 3px solid var(--red); }
+.ev-neu { background: var(--gray); color: var(--text); border-left: 3px solid var(--border); }
+
+/* Keywords */
+.kw-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+.kw { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+.kw-b { background: #E6F1FB; color: #0C447C; }
+.kw-g { background: var(--green-bg); color: var(--green-dark); }
+.kw-a { background: var(--amber-bg); color: var(--amber); }
+.kw-r { background: var(--red-bg); color: var(--red-dark); }
+
+/* Overall outlook */
+.outlook-box { border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+.outlook-label { font-size: 11px; font-weight: 600; opacity: .75; margin-bottom: 4px; }
+.outlook-val { font-size: 22px; font-weight: 700; }
+.outlook-reason { font-size: 13px; margin-top: 5px; opacity: .85; line-height: 1.5; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.metric { background: var(--gray); border-radius: 10px; padding: 10px 12px; }
+.m-label { font-size: 11px; color: var(--text2); margin-bottom: 3px; }
+.m-val { font-size: 14px; font-weight: 600; }
+
+/* Sector row */
+.s-row { display: flex; gap: 8px; align-items: flex-start; padding: 9px 14px; border-bottom: .5px solid var(--border); font-size: 13px; }
+.s-row:last-child { border-bottom: none; }
+.s-badge { min-width: 64px; padding: 3px 8px; border-radius: 20px; text-align: center; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+.s-reason { color: var(--text2); line-height: 1.5; }
+
+/* My stocks — highlight box */
+.mystock { border-radius: 12px; border: 1.5px solid var(--blue2); background: var(--card); margin-bottom: 10px; overflow: hidden; }
+.mystock-hdr { background: var(--blue); color: #fff; padding: 8px 14px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.mystock-body { padding: 12px 14px; }
+.mystock-name { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+.mystock-ticker { font-size: 11px; color: var(--text2); margin-bottom: 8px; }
+.mystock-signal { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
+.sig-pos { background: var(--green-bg); color: var(--green-dark); }
+.sig-neg { background: var(--red-bg); color: var(--red-dark); }
+.sig-neu { background: var(--amber-bg); color: var(--amber); }
+.mystock-reason { font-size: 13px; color: var(--text); line-height: 1.65; }
+.mystock-factors { margin-top: 8px; }
+.factor { font-size: 12px; color: var(--text2); padding: 3px 0; display: flex; gap: 5px; }
+.factor::before { content: "•"; color: var(--text3); }
+
+/* Risk */
+.risk-item { font-size: 13px; padding: 9px 14px; border-bottom: .5px solid var(--border); color: var(--red-dark); display: flex; gap: 6px; line-height: 1.5; }
+.risk-item:last-child { border-bottom: none; }
+
+/* Cat rows */
+.cat-row { display: flex; gap: 8px; padding: 9px 14px; border-bottom: .5px solid var(--border); font-size: 13px; line-height: 1.5; }
+.cat-row:last-child { border-bottom: none; }
+.cat-lbl { font-weight: 600; min-width: 60px; color: var(--text2); flex-shrink: 0; font-size: 12px; }
+
+/* Summary text */
+.summary { font-size: 14px; line-height: 1.75; color: var(--text); }
+
+/* Sources */
+.src-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+.src { font-size: 11px; padding: 3px 8px; border: .5px solid var(--border); border-radius: 20px; color: var(--text2); }
+
+/* Loading */
+.loading { text-align: center; padding: 48px 16px; color: var(--text2); }
+.spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-txt { font-size: 14px; }
+.loading-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
+
+/* Error */
+.error-box { background: var(--red-bg); border-radius: 12px; padding: 16px; color: var(--red-dark); font-size: 13px; line-height: 1.6; margin: 16px 0; }
+
+/* Disclaimer */
+.disclaimer { font-size: 11px; color: var(--text3); text-align: center; padding: 12px 0 4px; line-height: 1.6; }
+
+/* Updated time */
+.updated-bar { background: var(--gray2); border-radius: 8px; padding: 6px 10px; font-size: 11px; color: var(--text2); margin-bottom: 12px; display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-top">
+    <div>
+      <div class="hdr-title">📊 아침 시장 브리핑</div>
+      <div class="hdr-sub">미국 전일 · 한국 당일 예측</div>
+    </div>
+    <button class="refresh-btn" onclick="loadBriefing(true)">↻ 새로고침</button>
+  </div>
+  <div class="hdr-ts" id="hdr-ts">로딩 중...</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="sw('us')" id="tab-us">🇺🇸 미국</button>
+  <button class="tab" onclick="sw('kr')" id="tab-kr">🇰🇷 한국</button>
+  <button class="tab" onclick="sw('imp')" id="tab-imp">📈 예측</button>
+  <button class="tab" onclick="sw('my')" id="tab-my">⭐ 보유주</button>
+</div>
+
+<div class="content">
+  <div id="panel-us" class="panel active"><div class="loading"><div class="spinner"></div><div class="loading-txt">미국 시장 분석 중...</div><div class="loading-sub">잠시만 기다려 주세요</div></div></div>
+  <div id="panel-kr" class="panel"><div class="loading"><div class="spinner"></div><div class="loading-txt">한국 이슈 분석 중...</div></div></div>
+  <div id="panel-imp" class="panel"><div class="loading"><div class="spinner"></div><div class="loading-txt">영향 예측 생성 중...</div></div></div>
+  <div id="panel-my" class="panel"><div class="loading"><div class="spinner"></div><div class="loading-txt">보유 종목 분석 중...</div></div></div>
+</div>
+
+<script>
+const TABS = ['us','kr','imp','my'];
+function sw(id) {
+  TABS.forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t===id);
+    document.getElementById('panel-'+t).classList.toggle('active', t===id);
+  });
+}
+
+function fmt(v, decimals=2) {
+  if(v==null||v===undefined) return '-';
+  const n = parseFloat(v);
+  if(isNaN(n)) return '-';
+  return n.toFixed(decimals);
+}
+function fmtChg(v) {
+  if(v==null) return '<span class="nt">-</span>';
+  const n=parseFloat(v);
+  return n>0?`<span class="up">+${fmt(n)}</span>`:n<0?`<span class="dn">${fmt(n)}</span>`:`<span class="nt">0.00</span>`;
+}
+function fmtPct(v) {
+  if(v==null) return '<span class="nt">-</span>';
+  const n=parseFloat(v);
+  return n>0?`<span class="up">+${fmt(n)}%</span>`:n<0?`<span class="dn">${fmt(n)}%</span>`:`<span class="nt">0.00%</span>`;
+}
+function badge(v) {
+  if(v==null) return '<span class="badge b-nt">-</span>';
+  const n=parseFloat(v);
+  return n>0?'<span class="badge b-up">▲</span>':n<0?'<span class="badge b-dn">▼</span>':'<span class="badge b-nt">-</span>';
+}
+function impCls(s) { return s==='positive'?'ev-pos':s==='negative'?'ev-neg':'ev-neu'; }
+function impArrow(s) { return s==='positive'?'↑':s==='negative'?'↓':'→'; }
+function kwCls(t) {
+  if(t==='risk'||t==='geopolitical') return 'kw-r';
+  if(t==='trade'||t==='security') return 'kw-a';
+  if(t==='semiconductor'||t==='sector') return 'kw-g';
+  return 'kw-b';
+}
+
+function renderUS(d) {
+  const idx = (d.indices||[]).map(i=>`
+    <tr>
+      <td>${i.name}</td>
+      <td>${i.price!=null?parseFloat(i.price).toLocaleString():'-'}</td>
+      <td>${fmtChg(i.change)}</td>
+      <td>${fmtPct(i.pct)}</td>
+      <td>${badge(i.pct)}</td>
+    </tr>`).join('');
+  const stk = (d.stocks||[]).map(s=>`
+    <tr>
+      <td><span style="font-weight:600">${s.ticker}</span><span class="ticker">${s.name||''}</span></td>
+      <td>$${s.price!=null?parseFloat(s.price).toLocaleString():'-'}</td>
+      <td>${fmtChg(s.change)}</td>
+      <td>${fmtPct(s.pct)}</td>
+      <td>${badge(s.pct)}</td>
+    </tr>`).join('');
+  const evs = (d.key_events||[]).map(e=>`<div class="ev ${impCls(e.impact)}"><strong>${impArrow(e.impact)} ${e.title}</strong>${e.detail}</div>`).join('');
+  const kws = (d.keywords||[]).map(k=>`<span class="kw ${kwCls(k.type)}">${k.word}</span>`).join('');
+  const srcs = (d.sources||[]).map(s=>`<span class="src">${s}</span>`).join('');
+
+  document.getElementById('panel-us').innerHTML = `
+    <div class="updated-bar"><span>📅 ${d.date||''} NY 종가</span><span>${d.market_status||''}</span></div>
+    <div class="sec">주요 지수</div>
+    <div class="card"><table class="tbl">
+      <thead><tr><th>지수</th><th>종가</th><th>전일비</th><th>등락률</th><th></th></tr></thead>
+      <tbody>${idx}</tbody>
+    </table></div>
+    <div class="sec">주요 종목</div>
+    <div class="card"><table class="tbl">
+      <thead><tr><th>종목</th><th>종가</th><th>전일비</th><th>등락률</th><th></th></tr></thead>
+      <tbody>${stk}</tbody>
+    </table></div>
+    <div class="sec">핵심 요약</div>
+    <div class="card card-p"><p class="summary">${d.summary||''}</p></div>
+    <div class="sec">주요 이벤트</div>
+    ${evs}
+    <div class="sec">핵심 키워드</div>
+    <div class="kw-row">${kws}</div>
+    <div class="src-row">${srcs}</div>`;
+}
+
+function renderKR(d) {
+  const idx = (d.indices||[]).map(i=>`
+    <tr>
+      <td>${i.name}</td>
+      <td>${i.price!=null?parseFloat(i.price).toLocaleString():'-'}</td>
+      <td>${fmtChg(i.change)}</td>
+      <td>${fmtPct(i.pct)}</td>
+      <td>${badge(i.pct)}</td>
+    </tr>`).join('');
+  const stk = (d.stocks||[]).map(s=>`
+    <tr>
+      <td><span style="font-weight:600">${s.ticker}</span><span class="ticker">${s.name||''}</span></td>
+      <td>₩${s.price!=null?parseFloat(s.price).toLocaleString():'-'}</td>
+      <td>${fmtChg(s.change)}</td>
+      <td>${fmtPct(s.pct)}</td>
+      <td>${badge(s.pct)}</td>
+    </tr>`).join('');
+  const catMap = {politics:'🏛 정치',economy:'💰 경제',semiconductor:'💻 반도체',trade:'🚢 통상',security:'🛡 안보'};
+  const cats = Object.entries(d.categories||{}).map(([k,v])=>`
+    <div class="cat-row"><span class="cat-lbl">${catMap[k]||k}</span><span>${v}</span></div>`).join('');
+  const evs = (d.key_events||[]).map(e=>`<div class="ev ${impCls(e.impact)}"><strong>${impArrow(e.impact)} ${e.title}</strong>${e.detail}</div>`).join('');
+  const kws = (d.keywords||[]).map(k=>`<span class="kw ${kwCls(k.type)}">${k.word}</span>`).join('');
+  const srcs = (d.sources||[]).map(s=>`<span class="src">${s}</span>`).join('');
+
+  document.getElementById('panel-kr').innerHTML = `
+    <div class="updated-bar"><span>📅 ${d.date||''} 전일 종가</span><span>KRX 기준</span></div>
+    <div class="sec">주요 지수 (전일 종가)</div>
+    <div class="card"><table class="tbl">
+      <thead><tr><th>지수</th><th>종가</th><th>전일비</th><th>등락률</th><th></th></tr></thead>
+      <tbody>${idx}</tbody>
+    </table></div>
+    <div class="sec">주요 종목 (전일 종가)</div>
+    <div class="card"><table class="tbl">
+      <thead><tr><th>종목</th><th>종가</th><th>전일비</th><th>등락률</th><th></th></tr></thead>
+      <tbody>${stk}</tbody>
+    </table></div>
+    <div class="sec">분야별 이슈</div>
+    <div class="card">${cats}</div>
+    <div class="sec">주요 이벤트</div>
+    ${evs}
+    <div class="sec">핵심 키워드</div>
+    <div class="kw-row">${kws}</div>
+    <div class="src-row">${srcs}</div>`;
+}
+
+function renderImpact(d) {
+  const oc = d.overall==='positive'?'var(--green-dark)':d.overall==='negative'?'var(--red-dark)':'var(--amber)';
+  const ob = d.overall==='positive'?'var(--green-bg)':d.overall==='negative'?'var(--red-bg)':'var(--amber-bg)';
+  const sectors = (d.sector_impacts||[]).map(s=>{
+    const ic=s.impact==='positive'?'var(--green-dark)':s.impact==='negative'?'var(--red-dark)':'var(--amber)';
+    const ib=s.impact==='positive'?'var(--green-bg)':s.impact==='negative'?'var(--red-bg)':'var(--amber-bg)';
+    const ar=s.impact==='positive'?'↑':s.impact==='negative'?'↓':'→';
+    return `<div class="s-row">
+      <span class="s-badge" style="background:${ib};color:${ic};">${ar} ${s.sector}</span>
+      <span class="s-reason">${s.reason}</span>
+    </div>`;
+  }).join('');
+  const risks = (d.risk_factors||[]).map(r=>`<div class="risk-item"><span>⚠</span><span>${r}</span></div>`).join('');
+
+  document.getElementById('panel-imp').innerHTML = `
+    <div class="outlook-box" style="background:${ob};color:${oc};">
+      <div class="outlook-label">오늘 한국 시장 종합 전망</div>
+      <div class="outlook-val">${d.overall==='positive'?'긍정적 ↑':d.overall==='negative'?'부정적 ↓':'혼조 →'}</div>
+      <div class="outlook-reason">${d.overall_reason||''}</div>
+    </div>
+    <div class="two-col">
+      <div class="metric"><div class="m-label">코스피 예측</div><div class="m-val">${d.kospi_outlook||'-'}</div></div>
+      <div class="metric"><div class="m-label">코스닥 예측</div><div class="m-val">${d.kosdaq_outlook||'-'}</div></div>
+    </div>
+    <div class="sec">섹터별 영향</div>
+    <div class="card">${sectors}</div>
+    <div class="sec">리스크 요인</div>
+    <div class="card">${risks}</div>
+    <div class="disclaimer">${d.disclaimer||'본 예측은 AI 분석이며 투자 판단의 책임은 투자자 본인에게 있습니다.'}</div>`;
+}
+
+function renderMyStocks(d) {
+  const stocks = d.my_stocks || [];
+  const html = stocks.map(s => {
+    const sigCls = s.signal==='매수우호'||s.signal==='긍정'?'sig-pos':s.signal==='주의'||s.signal==='부정'?'sig-neg':'sig-neu';
+    const factors = (s.factors||[]).map(f=>`<div class="factor">${f}</div>`).join('');
+    return `<div class="mystock">
+      <div class="mystock-hdr">⭐ 보유 종목 분석</div>
+      <div class="mystock-body">
+        <div class="mystock-name">${s.name}</div>
+        <div class="mystock-ticker">${s.ticker} · 전일 ${s.prev_close||'-'}</div>
+        <span class="mystock-signal ${sigCls}">${s.signal}</span>
+        <div class="mystock-reason">${s.analysis}</div>
+        <div class="mystock-factors">${factors}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('panel-my').innerHTML = `
+    <div class="updated-bar"><span>⭐ 보유 3종목 맞춤 분석</span><span>AI 종합 판단</span></div>
+    ${html}
+    <div class="disclaimer">본 분석은 AI 의견이며 투자 판단의 책임은 투자자 본인에게 있습니다.</div>`;
+}
+
+async function loadBriefing(force=false) {
+  // Check cache (valid for 1 hour unless forced)
+  const cacheKey = 'briefing_cache';
+  const tsKey = 'briefing_ts';
+  if(!force) {
+    const cached = localStorage.getItem(cacheKey);
+    const ts = localStorage.getItem(tsKey);
+    if(cached && ts && (Date.now()-parseInt(ts)) < 3600000) {
+      try {
+        const data = JSON.parse(cached);
+        applyData(data);
+        return;
+      } catch(e) {}
+    }
+  }
+
+  // Show loading
+  TABS.forEach(t => {
+    document.getElementById('panel-'+t).innerHTML =
+      `<div class="loading"><div class="spinner"></div><div class="loading-txt">분석 중...</div><div class="loading-sub">30초~1분 소요</div></div>`;
+  });
+
+  try {
+    const res = await fetch('/api/briefing');
+    if(!res.ok) throw new Error('서버 오류 '+res.status);
+    const data = await res.json();
+    localStorage.setItem(cacheKey, JSON.stringify(data));
+    localStorage.setItem(tsKey, Date.now().toString());
+    applyData(data);
+  } catch(e) {
+    const errHtml = `<div class="error-box">⚠ 데이터를 불러오지 못했습니다.<br>${e.message}<br><br>잠시 후 새로고침을 눌러주세요.</div>`;
+    TABS.forEach(t => document.getElementById('panel-'+t).innerHTML = errHtml);
+  }
+}
+
+function applyData(data) {
+  const now = new Date().toLocaleString('ko-KR', {timeZone:'Asia/Seoul', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', weekday:'short'});
+  document.getElementById('hdr-ts').textContent = now + ' 업데이트';
+  if(data.us) renderUS(data.us);
+  if(data.kr) renderKR(data.kr);
+  if(data.impact) renderImpact(data.impact);
+  if(data.impact) renderMyStocks(data.impact);
+}
+
+loadBriefing();
+</script>
+</body>
+</html>
