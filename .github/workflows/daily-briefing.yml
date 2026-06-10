@@ -1,0 +1,28 @@
+name: 아침 시장 브리핑 자동 생성
+
+on:
+  schedule:
+    - cron: '50 21 * * *'
+  workflow_dispatch:
+
+jobs:
+  generate-briefing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 브리핑 API 호출
+        run: |
+          echo "=== 브리핑 생성 시작 $(date) ==="
+          RESPONSE=$(curl -s -o response.json -w "%{http_code}" \
+            -X GET "${{ secrets.VERCEL_APP_URL }}/api/briefing" \
+            -H "Cache-Control: no-cache" \
+            --max-time 90)
+          echo "HTTP Status: $RESPONSE"
+          if [ "$RESPONSE" = "200" ]; then
+            echo "✅ 브리핑 생성 성공"
+          else
+            echo "❌ 실패 (HTTP $RESPONSE)"
+            cat response.json
+            exit 1
+          fi
